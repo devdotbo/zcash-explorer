@@ -9,7 +9,7 @@ defmodule ZcashExplorerWeb.VkLive do
     <%= @message["message"] %>
     </div>
     </div>
-     """
+    """
   end
 
   @impl true

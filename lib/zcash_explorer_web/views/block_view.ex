@@ -61,7 +61,7 @@ defmodule ZcashExplorerWeb.BlockView do
     try do
       coinbase_binary = Base.decode16!(coinbase_hex, case: :mixed)
       coinbase_list = :erlang.binary_to_list(coinbase_binary)
-      List.to_string(coinbase_list) |> IO.inspect(charlists: :as_charlists)
+      List.to_string(coinbase_list)
     rescue
       _e in ArgumentError -> "unable to decode coinbase hex"
     end
@@ -81,7 +81,7 @@ defmodule ZcashExplorerWeb.BlockView do
   end
 
   def input_total(txs) do
-    [hd | tail] = txs
+    [_hd | tail] = txs
 
     tail
     |> Enum.map(fn x -> Map.get(x, :vin) end)

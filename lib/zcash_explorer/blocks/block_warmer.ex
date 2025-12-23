@@ -12,32 +12,45 @@ defmodule ZcashExplorer.Blocks.BlockWarmer do
   Executes this cache warmer.
   """
   def execute(_state) do
-    high = DateTime.utc_now() |> DateTime.to_unix()
-    low = DateTime.utc_now() |> DateTime.add(-900, :second) |> DateTime.to_unix()
-    # get the blocks mined in that duration
+    recent_block_count = 20
 
-    case Zcashex.getblockhashes(high, low, true, false) do
-      {:ok, blocks} ->
-        # enrich the blocks
-        blocks
-        |> Enum.map(fn x ->
-          {:ok, block} = Zcashex.getblock(x, 2)
-          block_struct = Zcashex.Block.from_map(block)
+    with {:ok, tip_height} <- Zcashex.getblockcount() do
+      start_height = max(tip_height - recent_block_count + 1, 0)
 
-          %{
-            "height" => block_struct.height,
-            "size" => block_struct.size,
-            "hash" => block_struct.hash,
-            "time" => ZcashExplorerWeb.BlockView.mined_time(block_struct.time),
-            "tx_count" => ZcashExplorerWeb.BlockView.transaction_count(block_struct.tx),
-            "output_total" => ZcashExplorerWeb.BlockView.output_total(block_struct.tx)
-          }
+      blocks =
+        start_height..tip_height
+        |> Task.async_stream(
+          fn height ->
+            with {:ok, hash} <- ZcashExplorer.RPC.getblockhash(height),
+                 {:ok, block} <- Zcashex.getblock(hash, 2) do
+              block_struct = Zcashex.Block.from_map(block)
+
+              %{
+                "height" => block_struct.height,
+                "size" => block_struct.size,
+                "hash" => block_struct.hash,
+                "time" => ZcashExplorerWeb.BlockView.mined_time(block_struct.time),
+                "tx_count" => ZcashExplorerWeb.BlockView.transaction_count(block_struct.tx),
+                "output_total" => ZcashExplorerWeb.BlockView.output_total(block_struct.tx)
+              }
+            else
+              _ -> nil
+            end
+          end,
+          max_concurrency: System.schedulers_online() * 2,
+          ordered: false,
+          timeout: 120_000
+        )
+        |> Enum.map(fn
+          {:ok, v} -> v
+          _ -> nil
         end)
+        |> Enum.reject(&is_nil/1)
         |> Enum.sort(&(&1["height"] >= &2["height"]))
-        |> handle_result
 
-      {:error, reason} ->
-        {:error, reason} |> handle_result
+      handle_result(blocks)
+    else
+      {:error, reason} -> handle_result({:error, reason})
     end
   end
 

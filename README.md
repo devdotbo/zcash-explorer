@@ -12,6 +12,8 @@ To start your Phoenix server:
   * Install Node.js dependencies with `npm install` inside the `assets` directory
   * Start Phoenix endpoint with `mix phx.server`
 
+Transparent address pages require address indexing. If you're using Zebra (no `getaddressdeltas`), configure lightwalletd gRPC via `LIGHTWALLETD_HOSTNAME` and `LIGHTWALLETD_PORT` (see `.env.example`).
+
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).

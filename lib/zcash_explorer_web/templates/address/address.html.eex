@@ -27,7 +27,7 @@
             </p>
           </div>
           <div class="inline-flex items-center  px-2.5 py-0.5 text-sm leading-5 font-medium  text-gray-700  tabular-nums antialiased dark:text-gray-50">
-            <%= ZcashExplorerWeb.TransactionView.format_zec(zatoshi_to_zec(@balance["balance"])) %>
+            <%= if is_integer(@balance["balance"]), do: ZcashExplorerWeb.TransactionView.format_zec(zatoshi_to_zec(@balance["balance"])), else: "N/A" %>
           </div>
         </div>
       </li>
@@ -42,7 +42,7 @@
           </div>
           <div class="inline-flex items-center  px-2.5 py-0.5 text-sm leading-5 font-medium  text-gray-700  tabular-nums antialiased dark:text-gray-50">
           
-            <%= ZcashExplorerWeb.TransactionView.format_zec(zatoshi_to_zec(@balance["received"])) %>
+            <%= if is_integer(@balance["received"]), do: ZcashExplorerWeb.TransactionView.format_zec(zatoshi_to_zec(@balance["received"])), else: "N/A" %>
            
           </div>
         </div>
@@ -58,7 +58,7 @@
           </div>
           <div class="inline-flex items-center  px-2.5 py-0.5 text-sm leading-5 font-medium  text-gray-700  tabular-nums antialiased dark:text-gray-50">
              
-            <%= ZcashExplorerWeb.TransactionView.format_zec(spend_zatoshi(@balance["received"],@balance["balance"])) %>
+            <%= if is_integer(@balance["received"]) and is_integer(@balance["balance"]), do: ZcashExplorerWeb.TransactionView.format_zec(spend_zatoshi(@balance["received"],@balance["balance"])), else: "N/A" %>
             
           </div>
         </div>
@@ -129,15 +129,21 @@
               <div class="min-w-0 space-y-3">
                 <div class="flex items-center space-x-3">
                   
-   <%= if delta["satoshis"] > 0 do %>
+   <%= if Map.has_key?(delta, "satoshis") and delta["satoshis"] > 0 do %>
   <span class="h-4 w-4 bg-green-100 rounded-full flex items-center justify-center" aria-hidden="true">
   <span class="h-2 w-2 bg-green-400 rounded-full"></span>
   </span>
   <% end %>
 
- <%= if delta["satoshis"] < 0 do %>
+ <%= if Map.has_key?(delta, "satoshis") and delta["satoshis"] < 0 do %>
    <span class="h-4 w-4 bg-red-100 rounded-full flex items-center justify-center" aria-hidden="true">
   <span class="h-2 w-2 bg-red-400 rounded-full"></span>
+ </span>
+ <% end %>
+
+ <%= if !Map.has_key?(delta, "satoshis") do %>
+   <span class="h-4 w-4 bg-gray-100 rounded-full flex items-center justify-center" aria-hidden="true">
+  <span class="h-2 w-2 bg-gray-400 rounded-full"></span>
  </span>
  <% end %>
 
@@ -145,11 +151,14 @@
                     <h2 class="text-sm font-medium dark:text-gray-50">
                       <a href='/transactions/<%= delta["txid"] %>'>
                         <span class="absolute inset-0" aria-hidden="true"></span>
-                         <%= if delta["satoshis"] > 0 do %>
+                         <%= if Map.has_key?(delta, "satoshis") and delta["satoshis"] > 0 do %>
                             Received
                          <% end %>
-                         <%= if delta["satoshis"] < 0 do %>
+                         <%= if Map.has_key?(delta, "satoshis") and delta["satoshis"] < 0 do %>
                             Sent
+                         <% end %>
+                         <%= if !Map.has_key?(delta, "satoshis") do %>
+                            Transaction
                          <% end %>
                       </a>
                     </h2>
@@ -157,9 +166,12 @@
                 </div>
                 <a href='' class="relative group flex items-center space-x-2.5">
                   <span class="text-sm text-gray-500 group-hover:text-gray-900 font-medium ">
-                    <%= ZcashExplorerWeb.TransactionView.format_zec(abs(zatoshi_to_zec(delta["satoshis"])))%> 
+                    <%= if Map.has_key?(delta, "satoshis"), do: ZcashExplorerWeb.TransactionView.format_zec(abs(zatoshi_to_zec(delta["satoshis"]))), else: "" %>
                   </span>
                 </a>
+                <%= if Map.has_key?(delta, "height") do %>
+                <p class="text-sm text-gray-500">Mined in block #<%= delta["height"] %></p>
+                <% end %>
               </div>
               <div class="hidden sm:flex flex-col shrink-0 items-end space-y-3">  
                 <p class="flex items-center space-x-4">

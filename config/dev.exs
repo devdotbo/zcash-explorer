@@ -46,6 +46,12 @@ config :zcash_explorer, Zcashex,
   vk_runnner_image: "nighthawkapps/vkrunner",
   zcash_network: "mainnet"
 
+config :zcash_explorer, ZcashExplorer.Lightwalletd,
+  enabled: true,
+  hostname: "localhost",
+  port: 9067,
+  tls: false
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed

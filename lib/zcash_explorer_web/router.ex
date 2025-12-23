@@ -21,7 +21,6 @@ defmodule ZcashExplorerWeb.Router do
     get "/", PageController, :index
     get "/blocks/:hash", BlockController, :get_block
     get "/transactions/:txid", TransactionController, :get_transaction
-    live "/price", PriceLive
     live "/metrics/difficulty", DifficultyLive
     live "/metrics/block_count", BlockCountLive
     live "/metrics/blockchain_size", BlockChainSizeLive
@@ -34,8 +33,6 @@ defmodule ZcashExplorerWeb.Router do
     live "/live/nodes", NodesLive
     live "/vkdetails", VkLive
     live "/blockchain-info-live", BlockChainInfoLive
-    get "/broadcast", PageController, :broadcast
-    post "/broadcast", PageController, :do_broadcast
     get "/payment-disclosure", PageController, :disclosure
     post "/payment-disclosure", PageController, :do_disclosure
     get "/address/:address", AddressController, :get_address
