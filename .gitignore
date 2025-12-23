@@ -37,3 +37,9 @@ npm-debug.log
 .env
 
 /.idea/
+
+# Local build artifacts
+.build/
+.mix/
+/node_modules/
+bun.lock
