@@ -3,3 +3,8 @@ deps
 assets/node_modules
 test
 .env
+.build
+.mix
+node_modules
+bun.lock
+*.log

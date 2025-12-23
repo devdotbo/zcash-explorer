@@ -79,12 +79,11 @@ config :zcash_explorer, ZcashExplorerWeb.Endpoint,
     transport_options: [socket_opts: [:inet6], compress: true]
   ],
   secret_key_base: secret_key_base,
-  # add all the domain names that will be routed to this application ( including TOR Onion Service)
+  # add all the domain names that will be routed to this application
   check_origin: [
     "http://127.0.0.1:4000",
-    "//zcashblockexplorer.com",
-    "//testnet.zcashblockexplorer.com",
-    "//zcashfgzdzxwiy7yq74uejvo2ykppu4pzgioplcvdnpmc6gcu5k6vwyd.onion"
+    "//#{explorer_hostname}",
+    "//localhost"
   ]
 
 config :zcash_explorer, Zcashex,

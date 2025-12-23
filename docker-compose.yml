@@ -1,0 +1,36 @@
+services:
+  explorer-mainnet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      ZCASH_NETWORK: mainnet
+      ZCASHD_PORT: "8232"
+      LIGHTWALLETD_PORT: "9167"
+      EXPLORER_HOSTNAME: ${MAINNET_EXPLORER_HOSTNAME:-zcashblockexplorer.com}
+      SECRET_KEY_BASE: ${MAINNET_SECRET_KEY_BASE}
+    ports:
+      - "20000:4000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  explorer-testnet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      ZCASH_NETWORK: testnet
+      ZCASHD_PORT: "18232"
+      LIGHTWALLETD_PORT: "9067"
+      EXPLORER_HOSTNAME: ${TESTNET_EXPLORER_HOSTNAME:-testnet.zcashblockexplorer.com}
+      SECRET_KEY_BASE: ${TESTNET_SECRET_KEY_BASE}
+    ports:
+      - "20001:4000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
