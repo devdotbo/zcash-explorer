@@ -32,4 +32,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `/blocks/<height>` now works by resolving block height to hash before calling `getblock`.
 - Removed debug `IO.inspect` usage in request paths and cleaned up minor template/format warnings.
 - Dockerfile instruction casing for `COPY rel rel`.
+- Handle nil `value` fields in transaction inputs/outputs when using Zebra (which does not populate vin.value like zcashd). Fixes "Internal Server Error" on mainnet block and transaction pages.
 
