@@ -16,6 +16,7 @@ ENV MIX_ENV=prod
 
 COPY mix.exs mix.lock ./
 COPY config config
+COPY deps_local deps_local
 RUN mix do deps.get, deps.compile
  
 COPY assets/package.json  ./assets/

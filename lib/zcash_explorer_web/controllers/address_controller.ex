@@ -127,10 +127,40 @@ defmodule ZcashExplorerWeb.AddressController do
         with {:ok, deltas} <- Zcashex.getaddressdeltas(address, start_block, end_block, true) do
           txs = deltas |> Map.get("deltas", []) |> Enum.reverse()
           {:ok, balance, txs}
+        else
+          {:error, _reason} ->
+            # Zebra supports getaddressbalance but not getaddressdeltas
+            # Fall back to lightwalletd for transaction list
+            fetch_transactions_from_lightwalletd(address, balance, start_block, end_block)
         end
 
       {:error, _reason} ->
         fetch_transparent_address_data_from_lightwalletd(address, start_block, end_block)
+    end
+  end
+
+  defp fetch_transactions_from_lightwalletd(address, balance, start_block, end_block) do
+    if ZcashExplorer.Lightwalletd.enabled?() do
+      case ZcashExplorer.Lightwalletd.taddress_transactions(address, start_block, end_block) do
+        {:ok, stream} ->
+          txs =
+            stream
+            |> Stream.take(50)
+            |> Stream.filter(&match?({:ok, _}, &1))
+            |> Stream.map(fn {:ok, tx} -> tx end)
+            |> Enum.map(&decode_taddr_tx/1)
+            |> Enum.reject(&is_nil/1)
+            |> Enum.sort_by(&Map.get(&1, "height"), :desc)
+
+          {:ok, balance, txs}
+
+        {:error, _reason} ->
+          # Return balance with empty transactions list
+          {:ok, balance, []}
+      end
+    else
+      # Return balance with empty transactions list if lightwalletd not configured
+      {:ok, balance, []}
     end
   end
 
@@ -144,6 +174,8 @@ defmodule ZcashExplorerWeb.AddressController do
         txs =
           stream
           |> Stream.take(50)
+          |> Stream.filter(&match?({:ok, _}, &1))
+          |> Stream.map(fn {:ok, tx} -> tx end)
           |> Enum.map(&decode_taddr_tx/1)
           |> Enum.reject(&is_nil/1)
           |> Enum.sort_by(&Map.get(&1, "height"), :desc)
