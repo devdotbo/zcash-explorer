@@ -4,10 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased] - 2025-12-23
+## [Unreleased] - 2025-12-25
 
 ### Added
 
+- Docker Compose setup for running mainnet and testnet explorers simultaneously (ports 20000 and 20001).
+- Single `.env` file configuration supporting both networks with `MAINNET_*` and `TESTNET_*` prefixed variables.
+- Dynamic `check_origin` configuration based on `EXPLORER_HOSTNAME` environment variable.
 - lightwalletd gRPC client and minimal proto definitions for transparent address support when the backend is Zebra (no `getaddressdeltas` / `getaddressbalance`).
 - Release config/env vars for lightwalletd: `LIGHTWALLETD_ENABLED`, `LIGHTWALLETD_HOSTNAME`, `LIGHTWALLETD_PORT`, `LIGHTWALLETD_TLS`, `LIGHTWALLETD_CACERTFILE`.
 - `ZcashExplorer.RPC` helper for JSON-RPC calls that aren't wrapped by `:zcashex` (e.g. `getblockhash` by height).
