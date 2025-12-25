@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Docker Compose setup for running mainnet and testnet explorers simultaneously (ports 20000 and 20001).
 - Single `.env` file configuration supporting both networks with `MAINNET_*` and `TESTNET_*` prefixed variables.
 - Dynamic `check_origin` configuration based on `EXPLORER_HOSTNAME` environment variable.
+- Repository guidelines (`AGENTS.md`) for AI-assisted development.
+- Local patched `zcashex` dependency (`deps_local/zcashex`) to handle JSON-RPC errors on HTTP 200 responses.
 - lightwalletd gRPC client and minimal proto definitions for transparent address support when the backend is Zebra (no `getaddressdeltas` / `getaddressbalance`).
 - Release config/env vars for lightwalletd: `LIGHTWALLETD_ENABLED`, `LIGHTWALLETD_HOSTNAME`, `LIGHTWALLETD_PORT`, `LIGHTWALLETD_TLS`, `LIGHTWALLETD_CACERTFILE`.
 - `ZcashExplorer.RPC` helper for JSON-RPC calls that aren't wrapped by `:zcashex` (e.g. `getblockhash` by height).
@@ -36,4 +38,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Removed debug `IO.inspect` usage in request paths and cleaned up minor template/format warnings.
 - Dockerfile instruction casing for `COPY rel rel`.
 - Handle nil `value` fields in transaction inputs/outputs when using Zebra (which does not populate vin.value like zcashd). Fixes "Internal Server Error" on mainnet block and transaction pages.
+- Address page 404 when using Zebra: added fallback to lightwalletd for transaction history when `getaddressdeltas` fails (Zebra supports `getaddressbalance` but not `getaddressdeltas`).
 
