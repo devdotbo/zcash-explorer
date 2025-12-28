@@ -72,7 +72,14 @@
 
   <div class="col-span-3 md:col-span-2 lg:col-span-2 sm:col-span-3">
       <div class="bg-white px-4 py-5 shadow rounded-lg sm:px-6 dark:bg-gray-800">
-<h2 id="technical-details" class="text-lg font-medium text-gray-900 dark:text-gray-300">Transaction History</h2>
+<div class="flex justify-between items-center">
+  <h2 id="technical-details" class="text-lg font-medium text-gray-900 dark:text-gray-300">Transaction History</h2>
+  <%= if @total_count > 0 do %>
+  <span class="text-sm text-gray-500 dark:text-gray-400">
+    <%= format_number(@total_count) %> transactions
+  </span>
+  <% end %>
+</div>
 
 
       <!-- TX List -->
@@ -149,7 +156,37 @@
           </li>
  <% end %>
 </ul>
- 
+
+<%= if @total_pages > 1 do %>
+<nav class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 py-3 sm:px-0 mt-4" aria-label="Pagination">
+  <div class="hidden sm:block">
+    <p class="text-sm text-gray-700 dark:text-gray-300">
+      Page <span class="font-medium"><%= @page %></span> of <span class="font-medium"><%= @total_pages %></span>
+    </p>
+  </div>
+  <div class="flex flex-1 justify-between sm:justify-end gap-3">
+    <%= if @has_prev do %>
+      <a href="<%= page_url(@address, @page - 1, nil) %>" class="relative inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+        Previous
+      </a>
+    <% else %>
+      <span class="relative inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-400 dark:text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 cursor-not-allowed">
+        Previous
+      </span>
+    <% end %>
+    <%= if @has_next do %>
+      <a href="<%= page_url(@address, @page + 1, @next_cursor) %>" class="relative inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+        Next
+      </a>
+    <% else %>
+      <span class="relative inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-400 dark:text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 cursor-not-allowed">
+        Next
+      </span>
+    <% end %>
+  </div>
+</nav>
+<% end %>
+
 </div>
 
   </div>

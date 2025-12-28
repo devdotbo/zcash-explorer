@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Zaino gRPC support for full address transaction history (queries from block 1 to latest).
 - `GetTaddressTxids` RPC method in proto definitions for Zaino compatibility.
+- `GetTaddressTxidsPaginated` RPC support for server-side pagination (20 transactions per page, ~450x faster than full fetch).
 - Direct txid computation via double-SHA256 hash (no longer depends on `decoderawtransaction` RPC).
 - Docker Compose setup for running mainnet and testnet explorers simultaneously (ports 20000 and 20001).
 - Single `.env` file configuration supporting both networks with `MAINNET_*` and `TESTNET_*` prefixed variables.
@@ -24,20 +25,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Docker Compose now uses Zaino gRPC ports (8138 mainnet, 8137 testnet) instead of lightwalletd.
 - Address page queries full blockchain (block 1 to latest) for complete transaction history.
-- Transaction list limited to 500 most recent transactions to prevent timeout on very active addresses.
-- Simplified address page UI: removed block range display and pagination buttons.
+- Address page now uses server-side pagination with cursor-based navigation (20 txs/page, 0.2s load time).
+- Address page shows "Page X of Y" with Previous/Next navigation buttons.
 - Transparent address pages now attempt zcashd-style address index RPCs first, then fall back to Zaino:
   - balance shown from `GetTaddressBalance`
-  - tx list shown from `GetTaddressTxids` (limited to 500 transactions)
+  - tx list shown from `GetTaddressTxidsPaginated` (paginated, 20 per page)
 - `/blocks` (and cache warmers for recent blocks/txs) no longer depend on the non-standard `getblockhashes` RPC; they use `getblockcount` + `getblockhash` + `getblockheader`/`getblock`.
 - Search now supports block height inputs by resolving height → hash before falling back to hash-based search.
 - Dependency set updated to support gRPC + align Cowboy versions (`plug_cowboy` bumped, `grpc` and `protobuf` added).
 - `.env.example` updated with lightwalletd configuration.
 
 ### Removed
-
-- Address page pagination buttons and block range header (now shows full history).
-- Unused pagination helper functions from `AddressView` (`disable_next`, `disable_previous`, `previous_pagination`, `next_pagination`).
 - Public transaction broadcasting: removed the `/broadcast` routes and navigation links.
 - Stale `PriceLive` route (module was missing).
 

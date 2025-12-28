@@ -5,6 +5,7 @@ defmodule ZcashExplorer.Lightwalletd do
     BlockRange,
     ChainSpec,
     Empty,
+    GetTaddressTxidsPaginatedArg,
     TransparentAddressBlockFilter,
     TxFilter
   }
@@ -63,6 +64,39 @@ defmodule ZcashExplorer.Lightwalletd do
 
     with {:ok, channel} <- Client.channel() do
       Stub.get_taddress_txids(channel, request)
+    else
+      {:error, reason} ->
+        Client.reset()
+        {:error, reason}
+    end
+  end
+
+  @doc """
+  Fetch paginated transparent address transactions using Zaino's GetTaddressTxidsPaginated RPC.
+
+  Options:
+    - :start_height - Start block height (inclusive), 0 = genesis (default: 0)
+    - :end_height - End block height (inclusive), 0 = chain tip (default: 0)
+    - :max_entries - Max transactions to return, 0 = unlimited (default: 20)
+    - :reverse - If true, return newest transactions first (default: true)
+  """
+  def taddress_transactions_paginated(address, opts \\ [])
+      when is_binary(address) do
+    start_height = Keyword.get(opts, :start_height, 0)
+    end_height = Keyword.get(opts, :end_height, 0)
+    max_entries = Keyword.get(opts, :max_entries, 20)
+    reverse = Keyword.get(opts, :reverse, true)
+
+    request = %GetTaddressTxidsPaginatedArg{
+      address: address,
+      start_height: start_height,
+      end_height: end_height,
+      max_entries: max_entries,
+      reverse: reverse
+    }
+
+    with {:ok, channel} <- Client.channel() do
+      Stub.get_taddress_txids_paginated(channel, request)
     else
       {:error, reason} ->
         Client.reset()

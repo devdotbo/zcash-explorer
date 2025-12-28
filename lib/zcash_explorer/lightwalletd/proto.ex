@@ -93,6 +93,25 @@ defmodule Cash.Z.Wallet.Sdk.Rpc.LightdInfo do
   field :lightwallet_protocol_version, 18, type: :string, json_name: "lightwalletProtocolVersion"
 end
 
+defmodule Cash.Z.Wallet.Sdk.Rpc.GetTaddressTxidsPaginatedArg do
+  use Protobuf, syntax: :proto3
+
+  field :address, 1, type: :string
+  field :start_height, 2, type: :uint64, json_name: "startHeight"
+  field :end_height, 3, type: :uint64, json_name: "endHeight"
+  field :max_entries, 4, type: :uint32, json_name: "maxEntries"
+  field :reverse, 5, type: :bool
+end
+
+defmodule Cash.Z.Wallet.Sdk.Rpc.PaginatedTxidsResponse do
+  use Protobuf, syntax: :proto3
+
+  field :transaction, 1, type: Cash.Z.Wallet.Sdk.Rpc.RawTransaction
+  field :block_height, 2, type: :uint64, json_name: "blockHeight"
+  field :tx_index, 3, type: :uint32, json_name: "txIndex"
+  field :total_count, 4, type: :uint64, json_name: "totalCount"
+end
+
 defmodule Cash.Z.Wallet.Sdk.Rpc.CompactTxStreamer.Service do
   use GRPC.Service, name: "cash.z.wallet.sdk.rpc.CompactTxStreamer"
 
@@ -109,6 +128,10 @@ defmodule Cash.Z.Wallet.Sdk.Rpc.CompactTxStreamer.Service do
 
   rpc :GetTaddressBalance, Cash.Z.Wallet.Sdk.Rpc.AddressList, Cash.Z.Wallet.Sdk.Rpc.Balance
   rpc :GetLightdInfo, Cash.Z.Wallet.Sdk.Rpc.Empty, Cash.Z.Wallet.Sdk.Rpc.LightdInfo
+
+  rpc :GetTaddressTxidsPaginated,
+      Cash.Z.Wallet.Sdk.Rpc.GetTaddressTxidsPaginatedArg,
+      stream(Cash.Z.Wallet.Sdk.Rpc.PaginatedTxidsResponse)
 end
 
 defmodule Cash.Z.Wallet.Sdk.Rpc.CompactTxStreamer.Stub do
