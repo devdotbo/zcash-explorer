@@ -62,7 +62,7 @@ defmodule ZcashExplorer.Lightwalletd do
     request = %TransparentAddressBlockFilter{address: address, range: range}
 
     with {:ok, channel} <- Client.channel() do
-      Stub.get_taddress_transactions(channel, request)
+      Stub.get_taddress_txids(channel, request)
     else
       {:error, reason} ->
         Client.reset()

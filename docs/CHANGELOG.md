@@ -4,10 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased] - 2025-12-25
+## [Unreleased] - 2025-12-28
 
 ### Added
 
+- Zaino gRPC support for full address transaction history (queries from block 1 to latest).
+- `GetTaddressTxids` RPC method in proto definitions for Zaino compatibility.
+- Direct txid computation via double-SHA256 hash (no longer depends on `decoderawtransaction` RPC).
 - Docker Compose setup for running mainnet and testnet explorers simultaneously (ports 20000 and 20001).
 - Single `.env` file configuration supporting both networks with `MAINNET_*` and `TESTNET_*` prefixed variables.
 - Dynamic `check_origin` configuration based on `EXPLORER_HOSTNAME` environment variable.
@@ -19,9 +22,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- Transparent address pages now attempt zcashd-style address index RPCs first, then fall back to lightwalletd:
+- Docker Compose now uses Zaino gRPC ports (8138 mainnet, 8137 testnet) instead of lightwalletd.
+- Address page queries full blockchain (block 1 to latest) for complete transaction history.
+- Transaction list limited to 500 most recent transactions to prevent timeout on very active addresses.
+- Simplified address page UI: removed block range display and pagination buttons.
+- Transparent address pages now attempt zcashd-style address index RPCs first, then fall back to Zaino:
   - balance shown from `GetTaddressBalance`
-  - tx list shown from `GetTaddressTransactions` (currently limited; does not compute per-tx deltas/amounts)
+  - tx list shown from `GetTaddressTxids` (limited to 500 transactions)
 - `/blocks` (and cache warmers for recent blocks/txs) no longer depend on the non-standard `getblockhashes` RPC; they use `getblockcount` + `getblockhash` + `getblockheader`/`getblock`.
 - Search now supports block height inputs by resolving height → hash before falling back to hash-based search.
 - Dependency set updated to support gRPC + align Cowboy versions (`plug_cowboy` bumped, `grpc` and `protobuf` added).
@@ -29,6 +36,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Removed
 
+- Address page pagination buttons and block range header (now shows full history).
+- Unused pagination helper functions from `AddressView` (`disable_next`, `disable_previous`, `previous_pagination`, `next_pagination`).
 - Public transaction broadcasting: removed the `/broadcast` routes and navigation links.
 - Stale `PriceLive` route (module was missing).
 

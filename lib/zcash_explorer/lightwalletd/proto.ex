@@ -103,6 +103,10 @@ defmodule Cash.Z.Wallet.Sdk.Rpc.CompactTxStreamer.Service do
       Cash.Z.Wallet.Sdk.Rpc.TransparentAddressBlockFilter,
       stream(Cash.Z.Wallet.Sdk.Rpc.RawTransaction)
 
+  rpc :GetTaddressTxids,
+      Cash.Z.Wallet.Sdk.Rpc.TransparentAddressBlockFilter,
+      stream(Cash.Z.Wallet.Sdk.Rpc.RawTransaction)
+
   rpc :GetTaddressBalance, Cash.Z.Wallet.Sdk.Rpc.AddressList, Cash.Z.Wallet.Sdk.Rpc.Balance
   rpc :GetLightdInfo, Cash.Z.Wallet.Sdk.Rpc.Empty, Cash.Z.Wallet.Sdk.Rpc.LightdInfo
 end

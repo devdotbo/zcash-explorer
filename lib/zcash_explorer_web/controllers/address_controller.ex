@@ -107,11 +107,7 @@ defmodule ZcashExplorerWeb.AddressController do
   defp pagination_range(_params, latest_block), do: default_pagination_range(latest_block)
 
   defp default_pagination_range(latest_block) do
-    chunk_size = 128
-    end_block = latest_block
-    start_block = ((chunk_size - 1) * (end_block / chunk_size)) |> floor()
-    start_block = if start_block <= 0, do: 1, else: start_block
-    {start_block, end_block, end_block}
+    {1, latest_block, latest_block}
   end
 
   defp parse_pos_int(value) when is_binary(value) do
@@ -145,9 +141,9 @@ defmodule ZcashExplorerWeb.AddressController do
         {:ok, stream} ->
           txs =
             stream
-            |> Stream.take(50)
             |> Stream.filter(&match?({:ok, _}, &1))
             |> Stream.map(fn {:ok, tx} -> tx end)
+            |> Stream.take(500)
             |> Enum.map(&decode_taddr_tx/1)
             |> Enum.reject(&is_nil/1)
             |> Enum.sort_by(&Map.get(&1, "height"), :desc)
@@ -173,9 +169,9 @@ defmodule ZcashExplorerWeb.AddressController do
 
         txs =
           stream
-          |> Stream.take(50)
           |> Stream.filter(&match?({:ok, _}, &1))
           |> Stream.map(fn {:ok, tx} -> tx end)
+          |> Stream.take(500)
           |> Enum.map(&decode_taddr_tx/1)
           |> Enum.reject(&is_nil/1)
           |> Enum.sort_by(&Map.get(&1, "height"), :desc)
@@ -190,11 +186,16 @@ defmodule ZcashExplorerWeb.AddressController do
   end
 
   defp decode_taddr_tx(%Cash.Z.Wallet.Sdk.Rpc.RawTransaction{data: data, height: height}) do
-    hex = Base.encode16(data, case: :lower)
+    # Compute txid as double-SHA256 hash of raw tx, reversed to little-endian
+    txid =
+      data
+      |> then(&:crypto.hash(:sha256, &1))
+      |> then(&:crypto.hash(:sha256, &1))
+      |> :binary.bin_to_list()
+      |> Enum.reverse()
+      |> :erlang.list_to_binary()
+      |> Base.encode16(case: :lower)
 
-    case Zcashex.decoderawtransaction(hex) do
-      {:ok, %{"txid" => txid}} -> %{"txid" => txid, "height" => height}
-      _ -> nil
-    end
+    %{"txid" => txid, "height" => height}
   end
 end

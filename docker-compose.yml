@@ -8,7 +8,7 @@ services:
     environment:
       ZCASH_NETWORK: mainnet
       ZCASHD_PORT: "8232"
-      LIGHTWALLETD_PORT: "9167"
+      LIGHTWALLETD_PORT: "8138"
       EXPLORER_HOSTNAME: ${MAINNET_EXPLORER_HOSTNAME:-zcashblockexplorer.com}
       SECRET_KEY_BASE: ${MAINNET_SECRET_KEY_BASE}
     ports:
@@ -26,7 +26,7 @@ services:
     environment:
       ZCASH_NETWORK: testnet
       ZCASHD_PORT: "18232"
-      LIGHTWALLETD_PORT: "9067"
+      LIGHTWALLETD_PORT: "8137"
       EXPLORER_HOSTNAME: ${TESTNET_EXPLORER_HOSTNAME:-testnet.zcashblockexplorer.com}
       SECRET_KEY_BASE: ${TESTNET_SECRET_KEY_BASE}
     ports:
