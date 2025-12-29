@@ -61,7 +61,7 @@ defmodule ZcashExplorerWeb.BlockView do
     try do
       coinbase_binary = Base.decode16!(coinbase_hex, case: :mixed)
       coinbase_list = :erlang.binary_to_list(coinbase_binary)
-      List.to_string(coinbase_list) |> IO.inspect(charlists: :as_charlists)
+      List.to_string(coinbase_list)
     rescue
       _e in ArgumentError -> "unable to decode coinbase hex"
     end
@@ -81,12 +81,12 @@ defmodule ZcashExplorerWeb.BlockView do
   end
 
   def input_total(txs) do
-    [hd | tail] = txs
+    [_hd | tail] = txs
 
     tail
     |> Enum.map(fn x -> Map.get(x, :vin) end)
     |> List.flatten()
-    |> Enum.reduce(0, fn x, acc -> Map.get(x, :value) + acc end)
+    |> Enum.reduce(0, fn x, acc -> (Map.get(x, :value) || 0) + acc end)
     |> Kernel.+(0.0)
     |> :erlang.float_to_binary([:compact, {:decimals, 10}])
   end
@@ -95,7 +95,7 @@ defmodule ZcashExplorerWeb.BlockView do
     txs
     |> Enum.map(fn x -> Map.get(x, :vout) end)
     |> List.flatten()
-    |> Enum.reduce(0, fn x, acc -> Map.get(x, :value) + acc end)
+    |> Enum.reduce(0, fn x, acc -> (Map.get(x, :value) || 0) + acc end)
     |> Kernel.+(0.0)
     |> :erlang.float_to_binary([:compact, {:decimals, 10}])
   end
@@ -104,7 +104,7 @@ defmodule ZcashExplorerWeb.BlockView do
     tx
     |> Map.get(:vout)
     |> List.flatten()
-    |> Enum.reduce(0, fn x, acc -> Map.get(x, :value) + acc end)
+    |> Enum.reduce(0, fn x, acc -> (Map.get(x, :value) || 0) + acc end)
     |> Kernel.+(0.0)
     |> :erlang.float_to_binary([:compact, {:decimals, 10}])
   end
@@ -113,7 +113,7 @@ defmodule ZcashExplorerWeb.BlockView do
     tx
     |> Map.get("vout")
     |> List.flatten()
-    |> Enum.reduce(0, fn x, acc -> Map.get(x, "value") + acc end)
+    |> Enum.reduce(0, fn x, acc -> (Map.get(x, "value") || 0) + acc end)
     |> Kernel.+(0.0)
     |> :erlang.float_to_binary([:compact, {:decimals, 10}])
   end

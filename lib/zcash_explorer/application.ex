@@ -28,6 +28,7 @@ defmodule ZcashExplorer.Application do
              Application.get_env(:zcash_explorer, Zcashex)[:zcashd_password]
            ]}
       },
+      {ZcashExplorer.Lightwalletd.Client, []},
       {Cachex,
        name: :app_cache,
        warmers: [

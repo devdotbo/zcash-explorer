@@ -12,39 +12,48 @@ defmodule ZcashExplorer.Transactions.TransactionWarmer do
   Executes this cache warmer.
   """
   def execute(_state) do
-    high = DateTime.utc_now() |> DateTime.to_unix()
-    low = DateTime.utc_now() |> DateTime.add(-900, :second) |> DateTime.to_unix()
-    # get the blocks mined in that duration
+    recent_block_count = 20
+    tx_take = 10
 
-    case Zcashex.getblockhashes(high, low, true, true) do
-      {:ok, blocks} ->
-        blocks
-        |> Enum.sort(&(&1["logicalts"] >= &2["logicalts"]))
-        |> Enum.map(fn x ->
-          {:ok, block} = Zcashex.getblock(Map.get(x, "blockhash"), 1)
-          tx = block["tx"]
+    with {:ok, tip_height} <- Zcashex.getblockcount() do
+      txids =
+        tip_height..max(tip_height - recent_block_count + 1, 0)
+        |> Enum.take(recent_block_count)
+        |> Enum.map(fn height ->
+          with {:ok, hash} <- ZcashExplorer.RPC.getblockhash(height),
+               {:ok, block} <- Zcashex.getblock(hash, 1) do
+            Map.get(block, "tx", [])
+          else
+            _ -> []
+          end
         end)
         |> List.flatten()
-        |> Enum.take(10)
-        |> Enum.map(fn y ->
-          {:ok, tx} = Zcashex.getrawtransaction(y, 1)
-          tx_data = Zcashex.Transaction.from_map(tx)
-          tx_data
+        |> Enum.take(tx_take)
+
+      txs =
+        txids
+        |> Enum.map(fn txid ->
+          with {:ok, tx} <- Zcashex.getrawtransaction(txid, 1) do
+            tx |> Zcashex.Transaction.from_map()
+          else
+            _ -> nil
+          end
         end)
-        |> Enum.map(fn z ->
+        |> Enum.reject(&is_nil/1)
+        |> Enum.map(fn tx ->
           %{
-            "txid" => Map.get(z, :txid),
-            "block_height" => Map.get(z, :height),
-            "time" => ZcashExplorerWeb.BlockView.mined_time(Map.get(z, :time)),
-            "tx_out_total" => ZcashExplorerWeb.BlockView.tx_out_total(z),
-            "size" => Map.get(z, :size),
-            "type" => ZcashExplorerWeb.BlockView.tx_type(z)
+            "txid" => Map.get(tx, :txid),
+            "block_height" => Map.get(tx, :height),
+            "time" => ZcashExplorerWeb.BlockView.mined_time(Map.get(tx, :time)),
+            "tx_out_total" => ZcashExplorerWeb.BlockView.tx_out_total(tx),
+            "size" => Map.get(tx, :size),
+            "type" => ZcashExplorerWeb.BlockView.tx_type(tx)
           }
         end)
-        |> handle_result
 
-      {:error, reason} ->
-        {:error, reason} |> handle_result
+      handle_result(txs)
+    else
+      {:error, reason} -> handle_result({:error, reason})
     end
   end
 

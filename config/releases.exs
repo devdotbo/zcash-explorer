@@ -63,6 +63,11 @@ zcash_network =
     environment variable ZCASH_NETWORK is missing
     """
 
+lightwalletd_enabled =
+  System.get_env("LIGHTWALLETD_ENABLED", "true")
+  |> String.downcase()
+  |> then(&(&1 in ["1", "true", "yes"]))
+
 config :zcash_explorer, ZcashExplorerWeb.Endpoint,
   url: [
     host: explorer_hostname,
@@ -74,12 +79,11 @@ config :zcash_explorer, ZcashExplorerWeb.Endpoint,
     transport_options: [socket_opts: [:inet6], compress: true]
   ],
   secret_key_base: secret_key_base,
-  # add all the domain names that will be routed to this application ( including TOR Onion Service)
+  # add all the domain names that will be routed to this application
   check_origin: [
     "http://127.0.0.1:4000",
-    "//zcashblockexplorer.com",
-    "//testnet.zcashblockexplorer.com",
-    "//zcashfgzdzxwiy7yq74uejvo2ykppu4pzgioplcvdnpmc6gcu5k6vwyd.onion"
+    "//#{explorer_hostname}",
+    "//localhost"
   ]
 
 config :zcash_explorer, Zcashex,
@@ -91,5 +95,35 @@ config :zcash_explorer, Zcashex,
   vk_mem: vk_mem,
   vk_runnner_image: vk_runnner_image,
   zcash_network: zcash_network
+
+if lightwalletd_enabled do
+  lightwalletd_hostname =
+    System.fetch_env!("LIGHTWALLETD_HOSTNAME") ||
+      raise """
+      environment variable LIGHTWALLETD_HOSTNAME is missing
+      """
+
+  lightwalletd_port =
+    System.fetch_env!("LIGHTWALLETD_PORT") ||
+      raise """
+      environment variable LIGHTWALLETD_PORT is missing
+      """
+
+  lightwalletd_tls =
+    System.get_env("LIGHTWALLETD_TLS", "false")
+    |> String.downcase()
+    |> then(&(&1 in ["1", "true", "yes"]))
+
+  lightwalletd_cacertfile = System.get_env("LIGHTWALLETD_CACERTFILE")
+
+  config :zcash_explorer, ZcashExplorer.Lightwalletd,
+    enabled: true,
+    hostname: lightwalletd_hostname,
+    port: String.to_integer(lightwalletd_port),
+    tls: lightwalletd_tls,
+    cacertfile: lightwalletd_cacertfile
+else
+  config :zcash_explorer, ZcashExplorer.Lightwalletd, enabled: false
+end
 
 config :zcash_explorer, ZcashExplorerWeb.Endpoint, server: true

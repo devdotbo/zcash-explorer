@@ -3,6 +3,20 @@ defmodule ZcashExplorerWeb.SearchController do
 
   def search(conn, %{"qs" => qs}) do
     qs = String.trim(qs)
+
+    case Integer.parse(qs) do
+      {height, ""} when height >= 0 ->
+        case ZcashExplorer.RPC.getblockhash(height) do
+          {:ok, _hash} -> redirect(conn, to: "/blocks/#{height}")
+          _ -> search_resource(conn, qs)
+        end
+
+      _ ->
+        search_resource(conn, qs)
+    end
+  end
+
+  defp search_resource(conn, qs) do
     # query zcashd to find out if the user has entered a valid resource
     # Valid resources:
     #  Block - height, hash
@@ -30,11 +44,6 @@ defmodule ZcashExplorerWeb.SearchController do
     {:ok, tx_resp} = Enum.at(results, 1)
     {:ok, tadd_resp} = Enum.at(results, 2)
     {:ok, zadd_resp} = Enum.at(results, 3)
-
-    IO.inspect(block_resp)
-    IO.inspect(tx_resp)
-    IO.inspect(tadd_resp)
-    IO.inspect(zadd_resp)
 
     cond do
       is_valid_block?(block_resp) ->

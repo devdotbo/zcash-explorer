@@ -5,35 +5,6 @@ defmodule ZcashExplorerWeb.PageController do
     render(conn, "index.html", page_title: "Zcash Explorer - Search the Zcash Blockchain")
   end
 
-  def broadcast(conn, _params) do
-    render(conn, "broadcast.html",
-      csrf_token: get_csrf_token(),
-      page_title: "Broadcast raw Zcash transaction"
-    )
-  end
-
-  def do_broadcast(conn, params) do
-    tx_hex = params["tx-hex"]
-
-    case Zcashex.sendrawtransaction(tx_hex) do
-      {:ok, resp} ->
-        conn
-        |> put_flash(:info, resp)
-        |> render("broadcast.html",
-          csrf_token: get_csrf_token(),
-          page_title: "Broadcast raw Zcash transaction"
-        )
-
-      {:error, reason} ->
-        conn
-        |> put_flash(:error, reason)
-        |> render("broadcast.html",
-          csrf_token: get_csrf_token(),
-          page_title: "Broadcast raw Zcash Transaction"
-        )
-    end
-  end
-
   def disclosure(conn, _params) do
     render(conn, "disclosure.html",
       csrf_token: get_csrf_token(),

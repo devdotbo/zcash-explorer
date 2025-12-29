@@ -12,30 +12,28 @@ defmodule ZcashExplorerWeb.AddressView do
     (received - balance) |> zatoshi_to_zec
   end
 
-  def disable_next(end_block, latest_block) do
-    end_block >= latest_block
+  def page_url(address, page, cursor) do
+    params =
+      [{"page", to_string(page)}]
+      |> maybe_add_param("cursor", cursor)
+      |> URI.encode_query()
+
+    "/address/#{address}?#{params}"
   end
 
-  def disable_previous(start_block) do
-    start_block == 1
+  defp maybe_add_param(params, _key, nil), do: params
+  defp maybe_add_param(params, key, value), do: params ++ [{key, to_string(value)}]
+
+  def format_number(n) when is_integer(n) do
+    n
+    |> Integer.to_string()
+    |> String.graphemes()
+    |> Enum.reverse()
+    |> Enum.chunk_every(3)
+    |> Enum.map(&Enum.reverse/1)
+    |> Enum.reverse()
+    |> Enum.join(",")
   end
 
-  def previous_pagination(start_block, end_block) do
-    s = start_block
-    e = end_block
-    diff = e - s
-    e = s - 1
-    s = e - diff
-    s = if s <= 0, do: 1, else: s
-    {s, e}
-  end
-
-  def next_pagination(start_block, end_block) do
-    s = start_block
-    e = end_block
-    diff = e - s
-    s = e + 1
-    e = s + diff
-    {s, e}
-  end
+  def format_number(_), do: "0"
 end
