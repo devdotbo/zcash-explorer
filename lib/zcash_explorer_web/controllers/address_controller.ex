@@ -197,35 +197,22 @@ defmodule ZcashExplorerWeb.AddressController do
   defp maybe_add_cursor(opts, cursor), do: Keyword.put(opts, :end_height, cursor)
 
   defp process_paginated_stream(stream) do
-    {txs, total_count, last_height} =
-      stream
-      |> Enum.reduce({[], 0, nil}, fn
-        {:ok, %Cash.Z.Wallet.Sdk.Rpc.PaginatedTxidsResponse{} = resp}, {txs, tc, _lh} ->
-          tx = decode_paginated_tx(resp)
-          new_total = if resp.total_count > 0, do: resp.total_count, else: tc
-          {[tx | txs], new_total, resp.block_height}
+    # Process stream and extract txid directly from Zaino response
+    stream
+    |> Enum.reduce({[], 0, nil}, fn
+      {:ok, %Cash.Z.Wallet.Sdk.Rpc.PaginatedTxidsResponse{} = resp}, {txs, tc, _lh} ->
+        new_total = if resp.total_count > 0, do: resp.total_count, else: tc
+        # Zaino now includes txid in response (32 bytes, little-endian)
+        txid_hex = Base.encode16(resp.txid, case: :lower)
+        tx = %{"txid" => txid_hex, "height" => resp.block_height}
+        {[tx | txs], new_total, resp.block_height}
 
-        _, acc ->
-          acc
-      end)
-
-    {Enum.reverse(txs), total_count, last_height}
-  end
-
-  defp decode_paginated_tx(%Cash.Z.Wallet.Sdk.Rpc.PaginatedTxidsResponse{
-         transaction: %Cash.Z.Wallet.Sdk.Rpc.RawTransaction{data: data},
-         block_height: height
-       }) do
-    txid =
-      data
-      |> then(&:crypto.hash(:sha256, &1))
-      |> then(&:crypto.hash(:sha256, &1))
-      |> :binary.bin_to_list()
-      |> Enum.reverse()
-      |> :erlang.list_to_binary()
-      |> Base.encode16(case: :lower)
-
-    %{"txid" => txid, "height" => height}
+      _, acc ->
+        acc
+    end)
+    |> then(fn {txs, total_count, last_height} ->
+      {Enum.reverse(txs), total_count, last_height}
+    end)
   end
 
   defp empty_pagination(page) do

@@ -110,6 +110,7 @@ defmodule Cash.Z.Wallet.Sdk.Rpc.PaginatedTxidsResponse do
   field :block_height, 2, type: :uint64, json_name: "blockHeight"
   field :tx_index, 3, type: :uint32, json_name: "txIndex"
   field :total_count, 4, type: :uint64, json_name: "totalCount"
+  field :txid, 5, type: :bytes
 end
 
 defmodule Cash.Z.Wallet.Sdk.Rpc.CompactTxStreamer.Service do

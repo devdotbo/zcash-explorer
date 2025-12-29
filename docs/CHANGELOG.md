@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Zaino gRPC support for full address transaction history (queries from block 1 to latest).
 - `GetTaddressTxids` RPC method in proto definitions for Zaino compatibility.
 - `GetTaddressTxidsPaginated` RPC support for server-side pagination (20 transactions per page, ~450x faster than full fetch).
-- Direct txid computation via double-SHA256 hash (no longer depends on `decoderawtransaction` RPC).
+- Txid extraction from Zaino `PaginatedTxidsResponse.txid` field (eliminates extra RPC calls, ~7x faster page loads).
 - Docker Compose setup for running mainnet and testnet explorers simultaneously (ports 20000 and 20001).
 - Single `.env` file configuration supporting both networks with `MAINNET_*` and `TESTNET_*` prefixed variables.
 - Dynamic `check_origin` configuration based on `EXPLORER_HOSTNAME` environment variable.
