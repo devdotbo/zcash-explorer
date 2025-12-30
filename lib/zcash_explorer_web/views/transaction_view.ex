@@ -164,6 +164,10 @@ defmodule ZcashExplorerWeb.TransactionView do
     "Transferred from shielded pool"
   end
 
+  def get_shielded_pool_label(_tx) do
+    "Shielded transfer"
+  end
+
   # 247aaa9a1307ab094cc077123867b019a20aa35cc7e394d7607127e146d54922
   def get_shielded_pool_value(tx)
       when tx.vjoinsplit != nil and
@@ -302,6 +306,10 @@ defmodule ZcashExplorerWeb.TransactionView do
              length(tx.vjoinsplit) == 0 and
              length(tx.vin) > 0 do
     0.00
+  end
+
+  def get_shielded_pool_value(_tx) do
+    0
   end
 
   def tx_in_total(tx) when is_map(tx) do
@@ -488,5 +496,10 @@ defmodule ZcashExplorerWeb.TransactionView do
              length(tx.vout) > 0 do
     fee = tx_in_total(tx) - abs(tx.valueBalance) - tx_out_total(tx)
     fee |> format_zec()
+  end
+
+  # Fallback for any mixed transaction pattern not explicitly handled
+  def mixed_tx_fees(_tx) do
+    "N/A"
   end
 end
